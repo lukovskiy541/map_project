@@ -2,9 +2,10 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../models/message.dart';
 
 class SocketService {
-  static const String _serverUrl = 'http://localhost:5000';
+  static const String _serverUrl =
+      'ws://localhost:5000';
   late IO.Socket _socket;
-  
+
   void connect() {
     _socket = IO.io(_serverUrl, <String, dynamic>{
       'transports': ['websocket'],
@@ -22,6 +23,7 @@ class SocketService {
   }
 
   void onNewMessage(Function(Message) onMessage) {
+    print("new message recieved");
     _socket.on('new_message', (data) {
       final message = Message.fromJson(Map<String, dynamic>.from(data));
       onMessage(message);

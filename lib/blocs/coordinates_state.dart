@@ -1,14 +1,21 @@
 part of 'coordinates_bloc.dart';
 
-@immutable
-abstract class CoordinatesState {}
+abstract class CoordinatesState {
+  final List<CoordinateData> coordinates;
+  
+  CoordinatesState(this.coordinates);
+}
 
 class CoordinatesInitial extends CoordinatesState {
+  CoordinatesInitial() : super([]);
+}
 
-  final List<Coordinates> coordinates;
+class CoordinatesLoaded extends CoordinatesState {
+  CoordinatesLoaded(super.coordinates);
+}
 
-  CoordinatesInitial({required this.coordinates});
+class CoordinatesError extends CoordinatesState {
+  final String error;
 
-
-
+  CoordinatesError(this.error) : super([]);
 }
