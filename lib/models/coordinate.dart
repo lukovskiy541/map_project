@@ -13,7 +13,7 @@ class CoordinateData {
 
   static final GeminiCoordinatesExtractor _extractor =
       GeminiCoordinatesExtractor(
-    apiKey: 'AIzaSyBbp55D9tXMFmH8lCVuxl-I9yzbLy2hnDY',
+    apiKey: '',
   );
 
   static final defaultLocation = (
