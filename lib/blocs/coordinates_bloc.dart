@@ -29,11 +29,13 @@ class CoordinatesBloc extends Bloc<CoordinatesEvent, CoordinatesState> {
   }
 
   void _onInitializeSocket(InitializeSocket event, Emitter<CoordinatesState> emit) {
-    _socketService.connect();
-    _socketService.onNewMessage((message) {
-      add(AddCoordinate(message));
-    });
-  }
+  print('Initializing socket connection...');
+  _socketService.connect();
+  _socketService.onNewMessage((message) {
+    print('Received message in bloc: ${message.toString()}');
+    add(AddCoordinate(message));
+  });
+}
 
   void _onDisconnectSocket(DisconnectSocket event, Emitter<CoordinatesState> emit) {
     _socketService.disconnect();
