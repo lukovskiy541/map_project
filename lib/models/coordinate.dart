@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:map_app/models/message.dart';
 import 'package:map_app/services/coordinates_extractor_service.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class CoordinateData {
   final double lat;
@@ -13,7 +14,7 @@ class CoordinateData {
 
   static final GeminiCoordinatesExtractor _extractor =
       GeminiCoordinatesExtractor(
-    apiKey: '',
+    apiKey: 'AIzaSyBbp55D9tXMFmH8lCVuxl-I9yzbLy2hnDY',
   );
 
   static final defaultLocation = (
@@ -32,14 +33,12 @@ class CoordinateData {
 
   static Future<List<CoordinateData>> fromMessage(Message message) async {
     final threats = await _extractor.extractThreats(message.messageText);
-    final citiesData = await _loadCitiesData(); // Load CSV data
-
+    final citiesData = await _loadCitiesData();
+    print(citiesData);
     return threats.map((threat) {
-      // Find matching city data
       final cityData = citiesData.firstWhere(
         (city) => city.name.toLowerCase() == threat.$2?.toLowerCase(),
         orElse: () => CityData(
-            // Default values if city not found
             name: threat.$2 ?? 'невідомо',
             lat: defaultLocation.lat,
             long: defaultLocation.long),
@@ -48,7 +47,7 @@ class CoordinateData {
       return CoordinateData(
         lat: cityData.lat,
         long: cityData.long,
-        name: threat.$1 ?? 'невідомо', // threat type
+        name: threat.$1 ?? 'невідомо',
         quantity: threat.$3 ?? 1,
         time: DateTime.now(),
         message: message.messageText,
@@ -65,16 +64,40 @@ class CityData {
   CityData({required this.name, required this.lat, required this.long});
 }
 
-Future<List<CityData>> _loadCitiesData() async {
-  final file = File('міста_україни.csv');
-  final lines = await file.readAsLines();
 
-  return lines.skip(1).map((line) {
-    final parts = line.split(',');
-    return CityData(
-      name: parts[0],
-      lat: double.parse(parts[1]),
-      long: double.parse(parts[2]),
-    );
-  }).toList();
+
+Future<List<CityData>> _loadCitiesData() async {
+  try {
+    final String content = await rootBundle.loadString('assets/міста_україни.csv');
+    final List<String> lines = content.split('\n');
+    
+    print('Loaded ${lines.length} lines from CSV');
+    
+    return lines.skip(1).map((line) {
+      try {
+        final parts = line.trim().split(',');
+        if (parts.length >= 3) {
+          return CityData(
+            name: parts[0].trim(),
+            lat: double.parse(parts[1].trim()),
+            long: double.parse(parts[2].trim()),
+          );
+        }
+        print('Invalid line format: $line');
+        return null;
+      } catch (e) {
+        print('Error parsing line: $line');
+        print('Error: $e');
+        return null;
+      }
+    })
+    .where((city) => city != null)
+    .cast<CityData>()
+    .toList();
+  } catch (e) {
+    print('Error loading cities data: $e');
+    return [
+      
+    ];
+  }
 }

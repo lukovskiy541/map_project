@@ -3,18 +3,15 @@ import 'package:map_app/models/coordinate.dart';
 import 'package:map_app/models/message.dart';
 import 'package:map_app/services/socket_service.dart';
 
-
 part 'coordinates_event.dart';
 part 'coordinates_state.dart';
-
-
 
 class CoordinatesBloc extends Bloc<CoordinatesEvent, CoordinatesState> {
   final int _maxCoordinates = 200;
   final _coordinates = <CoordinateData>[];
   final SocketService _socketService;
 
-  CoordinatesBloc({SocketService? socketService}) 
+  CoordinatesBloc({SocketService? socketService})
       : _socketService = socketService ?? SocketService(),
         super(CoordinatesInitial()) {
     on<AddCoordinate>(_onAddCoordinate);
@@ -28,43 +25,49 @@ class CoordinatesBloc extends Bloc<CoordinatesEvent, CoordinatesState> {
     add(InitializeSocket());
   }
 
-  void _onInitializeSocket(InitializeSocket event, Emitter<CoordinatesState> emit) {
-  print('Initializing socket connection...');
-  _socketService.connect();
-  _socketService.onNewMessage((message) {
-    print('Received message in bloc: ${message.toString()}');
-    add(AddCoordinate(message));
-  });
-}
+  void _onInitializeSocket(
+      InitializeSocket event, Emitter<CoordinatesState> emit) {
+    print('Initializing socket connection...');
+    _socketService.connect();
+    _socketService.onNewMessage((message) {
+      print('Received message in bloc: ${message.toString()}');
+      add(AddCoordinate(message));
+    });
+  }
 
-  void _onDisconnectSocket(DisconnectSocket event, Emitter<CoordinatesState> emit) {
+  void _onDisconnectSocket(
+      DisconnectSocket event, Emitter<CoordinatesState> emit) {
     _socketService.disconnect();
   }
 
-  void _onAddCoordinate(AddCoordinate event, Emitter<CoordinatesState> emit) async {
+  void _onAddCoordinate(
+      AddCoordinate event, Emitter<CoordinatesState> emit) async {
+    print('adding coordinate');
     try {
       final newCoordinates = await CoordinateData.fromMessage(event.message);
-      
+
       for (final coordinate in newCoordinates) {
         if (_coordinates.length >= _maxCoordinates) {
           _coordinates.removeLast();
         }
         _coordinates.insert(0, coordinate);
       }
-      
+
       emit(CoordinatesLoaded(List.from(_coordinates)));
     } catch (e) {
       emit(CoordinatesError('Failed to parse coordinates: $e'));
-      emit(CoordinatesLoaded(List.from(_coordinates))); 
+      emit(CoordinatesLoaded(List.from(_coordinates)));
     }
   }
 
-  void _onRemoveCoordinate(RemoveCoordinate event, Emitter<CoordinatesState> emit) {
+  void _onRemoveCoordinate(
+      RemoveCoordinate event, Emitter<CoordinatesState> emit) {
     _coordinates.remove(event.coordinate);
     emit(CoordinatesLoaded(List.from(_coordinates)));
   }
 
-  void _onClearCoordinates(ClearCoordinates event, Emitter<CoordinatesState> emit) {
+  void _onClearCoordinates(
+      ClearCoordinates event, Emitter<CoordinatesState> emit) {
     _coordinates.clear();
     emit(CoordinatesLoaded([]));
   }

@@ -52,13 +52,60 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  Widget buildIcon(String name) {
+  double width = 30.0;
+  double height = 30.0;
+  
+  String assetPath = 'assets/uav.png'; // default
+  
+  // Determine correct asset and size
+  if (name == "шахед" || name == "бпла") {
+    assetPath = 'assets/uav.png';
+  } else if (name == "ракета") {
+    assetPath = 'assets/missile.png';
+  } else if (name == "балістика") {
+    width = 60.0;
+    height = 60.0;
+    assetPath = 'assets/iskander.png';
+  } else if (name == "калібр") {
+    width = 60.0;
+    height = 60.0;
+    assetPath = 'assets/kalibr.png';
+  }
+
+  print('Attempting to load web asset: $assetPath');
+  
+  return Image.asset(
+    assetPath,
+    width: width,
+    height: height,
+    fit: BoxFit.contain,
+    errorBuilder: (context, error, stackTrace) {
+      print('Web asset load error for $assetPath:');
+      print('Error: $error');
+      print('Stack trace: $stackTrace');
+      return Container(
+        width: width,
+        height: height,
+        color: Colors.red,
+        child: Center(
+          child: Text(
+            '!',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    },
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CoordinatesBloc, CoordinatesState>(
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Flutter Map with Square'),
+            title: const Text('Map'),
           ),
           body: FlutterMap(
             mapController: _mapController,
@@ -87,32 +134,11 @@ class _MapScreenState extends State<MapScreen> {
               MarkerLayer(
                 markers: state is CoordinatesLoaded
                     ? state.coordinates.map((coord) {
-                        double width =30.0;
-                        double height = 30.0;
-                        Widget icon = Image.asset('assets/uav.png',
-                            fit: BoxFit.contain);
-
-                        if (coord.name == "ракета") {
-                          icon = Image.asset('assets/missile.png',
-                              fit: BoxFit.contain);
-                        }
-                        if (coord.name == "балістика") {
-                          width = 60.0;
-                          height = 60.0;
-                          icon = Image.asset('assets/iskander.png',
-                              fit: BoxFit.contain);
-                        }
-                        if (coord.name == "калібр") {
-                          width = 60.0;
-                          height = 60.0;
-                          icon = Image.asset('assets/kalibr.png',
-                              fit: BoxFit.contain);
-                        }
-
+                        
                         return Marker(
                           point: LatLng(coord.lat, coord.long),
-                          width: width,
-                          height: height,
+                          width: coord.name.contains("балістика") || coord.name.contains("калібр") ? 60.0 : 30.0,
+          height: coord.name.contains("балістика") || coord.name.contains("калібр") ? 60.0 : 30.0,
                           child: GestureDetector(
                             onTap: () {
                               showDialog(
@@ -136,7 +162,7 @@ class _MapScreenState extends State<MapScreen> {
                             },
                             child: Stack(
                               children: [
-                                icon,
+                                buildIcon(coord.name),
                                 if (coord.quantity >
                                     1) // показуємо badge тільки якщо є загрози
                                   Positioned(
