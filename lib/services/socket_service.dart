@@ -2,7 +2,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../models/message.dart';
 
 class SocketService {
-  static const String _serverUrl = 'http://localhost:5000';
+  static const String _serverUrl = 'https://telegram-channels-listener.onrender.com';  // Removed :5000
   late IO.Socket _socket;
 
   void connect() {
