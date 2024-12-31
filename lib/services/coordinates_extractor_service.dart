@@ -45,7 +45,7 @@ Output format (JSON array):
 ]
 }
 
-If no threats found, return: {"threats": []}.'''
+If no threats found or message tells about danger or alarm cancellation or something similar to the target has ceased to exist, return: {"threats": []}.'''
                 }
               ]
             }

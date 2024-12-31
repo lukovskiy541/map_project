@@ -2,7 +2,8 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../models/message.dart';
 
 class SocketService {
-  static const String _serverUrl = 'https://telegram-channels-listener.onrender.com';  // Removed :5000
+  static const String _serverUrl = 'https://telegram-channels-listener.onrender.com';  
+  //  static const String _serverUrl = 'http://localhost:5000';  
   late IO.Socket _socket;
 
   void connect() {
@@ -17,6 +18,8 @@ class SocketService {
         .build(),
     );
 
+    
+
     _setupEventHandlers();
   }
 
@@ -24,6 +27,12 @@ class SocketService {
     _socket.onConnect((_) {
       print('Connected to Socket.IO server');
       print('Socket ID: ${_socket.id}');
+    });
+
+    _socket.emit('client_connected', {
+      'clientId': _socket.id,
+      'timestamp': DateTime.now().toIso8601String(),
+      'message': 'Client connected successfully'
     });
     
     _socket.onDisconnect((_) => print('Disconnected from Socket.IO server'));

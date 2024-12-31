@@ -1,4 +1,4 @@
-import 'dart:io';
+
 
 import 'package:map_app/models/message.dart';
 import 'package:map_app/services/coordinates_extractor_service.dart';
@@ -34,7 +34,7 @@ class CoordinateData {
   static Future<List<CoordinateData>> fromMessage(Message message) async {
     final threats = await _extractor.extractThreats(message.messageText);
     final citiesData = await _loadCitiesData();
-    print(citiesData);
+    print("got message");
     return threats.map((threat) {
       final cityData = citiesData.firstWhere(
         (city) => city.name.toLowerCase() == threat.$2?.toLowerCase(),
@@ -83,7 +83,7 @@ Future<List<CityData>> _loadCitiesData() async {
             long: double.parse(parts[2].trim()),
           );
         }
-        print('Invalid line format: $line');
+ 
         return null;
       } catch (e) {
         print('Error parsing line: $line');
